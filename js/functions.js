@@ -19,4 +19,3 @@ function isPalindrome(str) {
 
 isPalindrome('Лёша на полке клопа нашёл ');
 isPalindrome('довод');
-
