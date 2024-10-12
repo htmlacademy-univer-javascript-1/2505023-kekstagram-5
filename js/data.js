@@ -52,3 +52,4 @@ const getPhoto = () => Array.from(
 );
 
 export { getPhoto };
+
