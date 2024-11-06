@@ -26,10 +26,10 @@ const renderThumbnails = (pictures, container) => {
       showBigPicture(picture);
     });
 
-    fragment.append(thumbnail);
+    fragment.appendChild(thumbnail);
   });
 
-  container.append(fragment);
+  container.appendChild(fragment);
 };
 
 export { renderThumbnails };
