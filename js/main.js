@@ -1,4 +1,4 @@
-import { getPhoto } from './data.js';
-import { renderThumbnails } from './thumbnail.js';
+import { objects } from './data.js';
+import './pictures.js';
 
-renderThumbnails(getPhoto());
+objects.at();
