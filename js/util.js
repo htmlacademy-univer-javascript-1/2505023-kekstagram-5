@@ -1,19 +1,30 @@
-const getRandomInt = (a,b) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a,b));
-  return Math.floor(Math.random() * (upper - lower + 1)) + lower;
+const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
+const createUniqueRandomNumberList = (min, max, length) => {
+  const previousNumbers = [];
+  while (previousNumbers.length < length) {
+    let currentValue = getRandomInteger(min, max);
+    while (previousNumbers.includes(currentValue)) {
+      currentValue = getRandomInteger(min, max);
+    }
+    previousNumbers.push(currentValue);
+  }
+  return previousNumbers;
+};
+const getUniqueNumber = (list, usedNumbers) => {
+  for (let i = 0; i < list.length; i++){
+    if (usedNumbers.includes(list[i]) === false){
+      usedNumbers.push(list[i]);
+      return list[i];
+    }
+  }
 };
 
-const getRandomArrayElement = (items) =>
-  items[getRandomInt(0, items.length - 1)];
+const isEscapeKey = (evt) => evt.key === 'Escape';
 
-const createIdGen = () => {
-  let lastGeneratedId = 0;
-  return () => {
-    lastGeneratedId += 1;
-    return lastGeneratedId;
-  };
+export {
+  getRandomInteger,
+  createUniqueRandomNumberList,
+  getUniqueNumber,
+  isEscapeKey
 };
-
-export { getRandomInt, getRandomArrayElement, createIdGen };
-
