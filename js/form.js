@@ -1,6 +1,7 @@
 import { isEscapeKey, successMessage, showAlert } from './util.js';
 import { sendData } from './api.js';
 import { pristine } from './data-validation.js';
+import { resetImage } from './picture-editing.js';
 
 const form = document.querySelector('.img-upload__form');
 const uploadFile = form.querySelector('#upload-file');
@@ -24,6 +25,7 @@ const onEscKeydown = (evt) => {
 
 function closeUploadOverlay () {
   form.reset();
+  resetImage();
   uploadOverlay.classList.add('hidden');
   body.classList.remove('modal-open');
   document.removeEventListener('keydown', onEscKeydown);
@@ -50,6 +52,7 @@ const unblockSubmitButton = () => {
 
 const onSendDataSuccess = () => {
   closeUploadOverlay();
+  resetImage();
   successMessage();
 };
 
