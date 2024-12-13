@@ -1,4 +1,4 @@
-import { isEscapeKey, successMessage, showAlert } from './util.js';
+import { isEscapeKey, successMessage, openSendDataErrorMessage } from './util.js';
 import { sendData } from './api.js';
 import { pristine } from './data-validation.js';
 import { resetImage } from './picture-editing.js';
@@ -25,6 +25,7 @@ const onEscKeydown = (evt) => {
 
 function closeUploadOverlay () {
   form.reset();
+  pristine.reset();
   resetImage();
   uploadOverlay.classList.add('hidden');
   body.classList.remove('modal-open');
@@ -56,17 +57,15 @@ const onSendDataSuccess = () => {
   successMessage();
 };
 
-const onSendDataError = () => {
-  showAlert('Не удалось загрузить фотографию');
-};
-
 const onFormSubmit = (evt) => {
   evt.preventDefault();
   if (pristine.validate()) {
     blockSubmitButton();
-    sendData(onSendDataSuccess, onSendDataError, new FormData(form));
+    sendData(onSendDataSuccess, openSendDataErrorMessage, new FormData(form));
     unblockSubmitButton();
   }
 };
 
 form.addEventListener('submit', onFormSubmit);
+
+export { onEscKeydown };

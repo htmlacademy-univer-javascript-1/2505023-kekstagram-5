@@ -1,4 +1,3 @@
-import {objects} from './data.js';
 import {openBigPicture} from './big-picture.js';
 
 const pattern = document.querySelector('#picture').content.querySelector('.picture');
@@ -27,4 +26,4 @@ const renderPictures = (pictures) => {
   container.append(fragment);
 };
 
-renderPictures(objects);
+export { renderPictures };
