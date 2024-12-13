@@ -1,5 +1,8 @@
-import { objects } from './data.js';
-import './pictures.js';
+import { renderPictures } from './pictures.js';
+import { getData } from './api.js';
 import './form.js';
 
-objects.at();
+getData((loadedPictures) => {
+  const pictures = [...loadedPictures];
+  renderPictures([...pictures]);
+});

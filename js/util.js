@@ -1,8 +1,14 @@
+import { onEscKeydown } from './form.js';
+
 const ALERT_SHOW_TIME = 5000;
 
-const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 const successTemplate = document.querySelector('#success').content.querySelector('.success');
 const successButton = successTemplate.querySelector('.success__button');
+const blockSendError = document.querySelector('#error').content.querySelector('.error');
+const errorMessage = blockSendError.cloneNode(true);
+const errorMessageCloseElement = errorMessage.querySelector('.error__button');
+
+const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
 const createUniqueRandomNumberList = (min, max, length) => {
   const previousNumbers = [];
@@ -46,17 +52,67 @@ const showAlert = (message) => {
   }, ALERT_SHOW_TIME);
 };
 
-const successMessage = () => {
-  const fragment = document.createDocumentFragment();
-  fragment.append(successTemplate);
-  document.body.append(fragment);
-};
-
 const onSuccessButtonCLick = () => {
   document.querySelector('.success').remove();
 };
 
-successButton.addEventListener('click', onSuccessButtonCLick);
+const onSuccessEscKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    document.querySelector('.success').remove();
+  }
+};
+
+const onSuccessClickEmpty = (evt) => {
+  if (!(evt.target.closest('.success__inner'))) {
+    document.querySelector('.success').remove();
+  }
+};
+
+const successMessage = () => {
+  const fragment = document.createDocumentFragment();
+  fragment.append(successTemplate);
+  document.body.append(fragment);
+  successButton.addEventListener('click', onSuccessButtonCLick);
+  document.addEventListener('keydown', onSuccessEscKeydown);
+  document.addEventListener('click', onSuccessClickEmpty);
+};
+
+errorMessage.classList.add('hidden');
+document.body.appendChild(errorMessage);
+
+const onPopupErrorEscKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    closeSendDataErrorMessage();
+  }
+};
+
+const onPopupErrorClickClose = () => {
+  closeSendDataErrorMessage();
+};
+
+const onPopupErrorClickEmpty = (evt) => {
+  if (!(evt.target.closest('.error__inner'))) {
+    closeSendDataErrorMessage();
+  }
+};
+
+const openSendDataErrorMessage = () => {
+  errorMessage.classList.remove('hidden');
+  document.addEventListener('keydown', onPopupErrorEscKeydown);
+  errorMessageCloseElement.addEventListener('click', onPopupErrorClickClose);
+  document.addEventListener('click', onPopupErrorClickEmpty);
+  document.removeEventListener('keydown', onEscKeydown);
+};
+
+function closeSendDataErrorMessage() {
+  errorMessage.classList.add('hidden');
+  document.removeEventListener('keydown', onPopupErrorEscKeydown);
+  errorMessageCloseElement.removeEventListener('click', onPopupErrorClickClose);
+  document.removeEventListener('click', onPopupErrorClickEmpty);
+  document.addEventListener('keydown', onEscKeydown);
+}
 
 const isElementRepeat = (element, array) => {
   if (array.length > 1 && array.indexOf(element, array.indexOf(element) + 1) > 0) {
@@ -71,6 +127,7 @@ export {
   getUniqueNumber,
   isEscapeKey,
   successMessage,
+  openSendDataErrorMessage,
   showAlert,
   isElementRepeat
 };
