@@ -1408,3 +1408,22 @@ main {
 .hidden {
   display: none;
 }
+
+/* Ошибка загрузки данных с сервера */
+
+.alert_message {
+  position: absolute;
+  z-index: 100;
+  left:0;
+  right:0;
+  top: 5px;
+  padding: 20px;
+  font-size: 40px;
+  text-align: center;
+  color: whitesmoke;
+  font-weight: bold;
+  border-top: 2px solid #f48181;
+  border-bottom: 2px solid #f48181;
+  border-left: none;
+  border-right: none;
+}
