@@ -1,16 +1,15 @@
-import {getData} from './api.js';
-import {showFilteredPhotos} from './filters.js';
-import './formPreview.js';
-import './effects.js';
-import './scale.js';
+import { displayFilteredPictures } from './filters.js';
+import { loadData } from './dataApi.js';
+import { displayAlert } from './utils.js';
+import './forms.js';
 
+// Асинхронная функция для получения изображений
 const loadPictures = async () => {
   try {
-    showFilteredPhotos(await getData());
-  } catch (err){
-    const alertMessage = document.querySelector('#alert').content;
-    alertMessage.querySelector('.alert_message').textContent = err.message;
-    document.body.append(alertMessage);
+    const pictures = await loadData(); // Получаем данные о изображениях
+    displayFilteredPictures(pictures); // Отображаем отфильтрованные изображения
+  } catch (error) {
+    displayAlert(error); // Отображаем сообщение об ошибке
   }
 };
 

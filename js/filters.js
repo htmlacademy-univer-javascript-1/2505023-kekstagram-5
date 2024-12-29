@@ -1,42 +1,54 @@
-import {getPictures} from './pictures.js';
-import {getRandomElementsArray, debounce} from './utils.js';
+import { renderPictures } from './gallery-pictures.js';
+import { debounceFunction, getRandomItems } from './utils.js';
 
-const MAX_RANDOM_PICTURES_COUNT = 10;
+const MAX_RANDOM_COUNT = 10; // Максимальное количество случайных изображений
+const ACTIVE_CLASS_NAME = 'img-filters__button--active'; // Класс для активной кнопки фильтра
+const filterContainer = document.querySelector('.img-filters'); // Контейнер для фильтров
+const defaultFilterButton = document.querySelector('#filter-default'); // Кнопка "по умолчанию"
+const randomFilterButton = document.querySelector('#filter-random'); // Кнопка "случайные"
+const discussedFilterButton = document.querySelector('#filter-discussed'); // Кнопка "обсуждаемые"
 
-const ACTIVE_CLASS = 'img-filters__button--active';
+// Функция для получения случайных изображений
+const getRandomPictures = (pictures, count) => getRandomItems(pictures, count);
 
-const filterSection = document.querySelector('.img-filters');
-const defaultfFilter = document.querySelector('#filter-default');
-const randomFilter = document.querySelector('#filter-random');
-const discussedFilter = document.querySelector('#filter-discussed');
+// Функция для сортировки по количеству комментариев
+const sortByCommentsCount = (a, b) => b.comments.length - a.comments.length;
 
-const getRandomPhotos = (photos, count) => getRandomElementsArray(photos, count);
+// Функция для получения обсуждаемых фотографий
+const getDiscussedPhotos = (pictures) => [...pictures].sort(sortByCommentsCount);
 
-const sortByComments = (firstPhoto, secondPhoto) => secondPhoto.comments.length - firstPhoto.comments.length;
-const getDiscussedPhotos = (photos) => photos.slice().sort(sortByComments);
-
-const removePhotos = () => document.querySelectorAll('.picture').forEach((photo) => photo.remove());
-
-const changePhotos = (photos, filter) => {
-  removePhotos();
-  const activeFilter = document.querySelector(`.${ACTIVE_CLASS}`);
-  activeFilter.classList.remove(ACTIVE_CLASS);
-  getPictures(photos);
-  filter.classList.add(ACTIVE_CLASS);
+// Функция для очистки изображений на странице
+const clearPictures = () => {
+  document.querySelectorAll('.picture').forEach((picture) => picture.remove());
 };
 
-const showFilteredPhotos = (photos) => {
-  getPictures(photos);
-  filterSection.classList.remove('img-filters--inactive');
-  defaultfFilter.addEventListener('click', debounce(() => {
-    changePhotos(photos, defaultfFilter);
+// Функция для применения выбранного фильтра
+const applyFilter = (pictures, activeButton) => {
+  clearPictures(); // Очищаем текущие изображения
+  const currentActiveButton = document.querySelector(`.${ACTIVE_CLASS_NAME}`);
+  if (currentActiveButton) {
+    currentActiveButton.classList.remove(ACTIVE_CLASS_NAME); // Убираем активный класс у текущей кнопки
+  }
+  renderPictures(pictures); // Отображаем отфильтрованные изображения
+  activeButton.classList.add(ACTIVE_CLASS_NAME); // Добавляем активный класс к выбранной кнопке
+};
+
+// Функция для отображения отфильтрованных фотографий
+const displayFilteredPictures = (pictures) => {
+  renderPictures(pictures);
+  filterContainer.classList.remove('img-filters--inactive'); // Убираем класс неактивности у контейнера фильтров
+
+  randomFilterButton.addEventListener('click', debounceFunction(() => {
+    applyFilter(getRandomPictures(pictures, MAX_RANDOM_COUNT), randomFilterButton); // Применяем случайный фильтр
   }));
-  randomFilter.addEventListener('click', debounce(() => {
-    changePhotos(getRandomPhotos(photos, MAX_RANDOM_PICTURES_COUNT), randomFilter);
+
+  discussedFilterButton.addEventListener('click', debounceFunction(() => {
+    applyFilter(getDiscussedPhotos(pictures), discussedFilterButton); // Применяем фильтр обсуждаемых фотографий
   }));
-  discussedFilter.addEventListener('click', debounce(() => {
-    changePhotos(getDiscussedPhotos(photos), discussedFilter);
+
+  defaultFilterButton.addEventListener('click', debounceFunction(() => {
+    applyFilter(pictures, defaultFilterButton); // Применяем фильтр по умолчанию
   }));
 };
 
-export {showFilteredPhotos};
+export { displayFilteredPictures };
