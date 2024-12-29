@@ -1,36 +1,36 @@
-import {isEscapeKey} from './utils.js';
+import {isEscapeKey} from './util.js';
 
 const body = document.body;
 const successMessage = document.querySelector('#success').content.querySelector('.success');
 const errorMessage = document.querySelector('#error').content.querySelector('.error');
 
-const hideMessage = () => {
+const onHideMessage = () => {
   const message = document.querySelector('.success') || document.querySelector('.error');
   const messageCloseButton = document.querySelector('.success__button') || document.querySelector('.error__button');
-  document.removeEventListener('keydown', closeMessageByEscape);
-  body.removeEventListener('click', closeMessageByBodyClick);
-  messageCloseButton.removeEventListener('click', hideMessage);
+  document.removeEventListener('keydown', onCloseMessageByEscape);
+  body.removeEventListener('click', onCloseMessageByBodyClick);
+  messageCloseButton.removeEventListener('click', onHideMessage);
   message.remove();
 };
 
-function closeMessageByEscape(evt) {//всплытие
+function onCloseMessageByEscape(evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    hideMessage();
+    onHideMessage();
   }
 }
 
-function closeMessageByBodyClick(evt) {//всплытие
+function onCloseMessageByBodyClick(evt) {
   if (!(evt.target.closest('.success__inner') || evt.target.closest('.error__inner'))) {
-    hideMessage();
+    onHideMessage();
   }
 }
 
 const showMessage = (message, messageCloseButton) => {
-  body.append(message.cloneNode(true));
-  document.addEventListener('keydown', closeMessageByEscape);
-  body.addEventListener('click', closeMessageByBodyClick);
-  body.querySelector(messageCloseButton).addEventListener('click', hideMessage);
+  body.append(message);
+  document.addEventListener('keydown', onCloseMessageByEscape);
+  body.addEventListener('click', onCloseMessageByBodyClick);
+  body.querySelector(messageCloseButton).addEventListener('click', onHideMessage);
 };
 
 const showSuccessMessage = () => showMessage(successMessage, '.success__button');

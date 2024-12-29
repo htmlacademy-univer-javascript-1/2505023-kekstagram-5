@@ -1,17 +1,14 @@
-import {getData} from './api.js';
-import {showFilteredPhotos} from './filters.js';
-import './formPreview.js';
-import './effects.js';
-import './scale.js';
+import { showFilteredPictures } from './filter.js';
+import { getData } from './api.js';
+import { showAlert } from './util.js';
+import './form.js';
 
-const loadPictures = async () => {
+const fetchPictures = async () => {
   try {
-    showFilteredPhotos(await getData());
-  } catch (err){
-    const alertMessage = document.querySelector('#alert').content;
-    alertMessage.querySelector('.alert_message').textContent = err.message;
-    document.body.append(alertMessage);
+    showFilteredPictures(await getData());
+  } catch (error){
+    showAlert(error);
   }
 };
 
-loadPictures();
+fetchPictures();
