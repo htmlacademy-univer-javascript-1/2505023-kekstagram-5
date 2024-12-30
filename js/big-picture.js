@@ -94,3 +94,4 @@ const openBigPictureModal = (data) => {
 cancelButton.addEventListener('click', onCancelButtonClick); // Добавляем обработчик нажатия на кнопку отмены
 
 export { openBigPictureModal };
+
