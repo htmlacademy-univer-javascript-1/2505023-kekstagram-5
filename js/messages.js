@@ -1,47 +1,58 @@
-import { isEscapeKeyPressed } from './utils.js';
+import { closeForm } from './slider.js';
+import { isEscapeKey } from './utils.js';
+import { uploadData } from './fetch.js';
 
-const documentBody = document.body;
-const successTemplate = document.querySelector('#success').content.querySelector('.success');
-const errorTemplate = document.querySelector('#error').content.querySelector('.error');
+const errorMessage = document.querySelector('#error').content.querySelector('.error');
+const successMessage = document.querySelector('#success').content.querySelector('.success');
+const formUpload = document.querySelector('.img-upload__form');
 
-// Функция для скрытия сообщения
-const hideMessage = () => {
-  const messageElement = document.querySelector('.success') || document.querySelector('.error'); // Находим текущее сообщение
-  const closeButton = document.querySelector('.success__button') || document.querySelector('.error__button'); // Находим кнопку закрытия
-
-  document.removeEventListener('keydown', handleCloseByEscape); // Убираем обработчик нажатия клавиш
-  documentBody.removeEventListener('click', handleCloseByBodyClick); // Убираем обработчик клика по телу
-  closeButton.removeEventListener('click', hideMessage); // Убираем обработчик клика по кнопке закрытия
-  messageElement.remove(); // Удаляем сообщение из DOM
+const closePopup = () => {
+  const popup = document.querySelector('.error') || document.querySelector('.success');
+  popup.remove();
 };
 
-// Обработчик нажатия клавиши Escape для закрытия сообщения
-function handleCloseByEscape(evt) {
-  if (isEscapeKeyPressed(evt)) {
-    evt.preventDefault(); // Предотвращаем стандартное действие
-    hideMessage(); // Скрываем сообщение
+const onEscKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    closePopup();
   }
-}
-
-// Обработчик клика по телу документа для закрытия сообщения
-function handleCloseByBodyClick(evt) {
-  if (!(evt.target.closest('.success__inner') || evt.target.closest('.error__inner'))) {
-    hideMessage(); // Скрываем сообщение, если кликнули вне его области
-  }
-}
-
-// Функция для отображения сообщения
-const displayMessage = (messageElement, closeButtonSelector) => {
-  documentBody.append(messageElement);
-  document.addEventListener('keydown', handleCloseByEscape);
-  documentBody.addEventListener('click', handleCloseByBodyClick);
-  documentBody.querySelector(closeButtonSelector).addEventListener('click', hideMessage);
 };
 
-// Функция для отображения сообщения об успехе
-const showSuccessNotification = () => displayMessage(successTemplate.cloneNode(true), '.success__button');
+const onPopupClick = (evt) => {
+  if (!evt.target.classList.contains('succes__inner') && !evt.target.classList.contains('error__inner')) {
+    evt.preventDefault();
+    closePopup();
+    document.removeEventListener('keydown', onEscKeydown);
+  }
+};
 
-// Функция для отображения сообщения об ошибке
-const showErrorNotification = () => displayMessage(errorTemplate.cloneNode(true), '.error__button');
+const showMessage = (message) => {
+  message.addEventListener('click', onPopupClick);
+  document.body.appendChild(message);
+  document.addEventListener('keydown', onEscKeydown, {once: true});
+};
 
-export { showSuccessNotification, showErrorNotification };
+const showErrorMessage = () => {
+  const messageFragment = errorMessage.cloneNode(true);
+  showMessage(messageFragment);
+};
+
+const showSuccesMessage = () => {
+  const messageFragment = successMessage.cloneNode(true);
+  showMessage(messageFragment);
+};
+
+const onSuccess = () => {
+  closeForm();
+  showSuccesMessage();
+};
+
+const onFail = () => {
+  showErrorMessage();
+};
+
+const onFormUploadSubmit = (evt) => {
+  evt.preventDefault();
+  uploadData(onSuccess, onFail, 'POST', new FormData(evt.target));
+};
+
+formUpload.addEventListener('submit', onFormUploadSubmit);

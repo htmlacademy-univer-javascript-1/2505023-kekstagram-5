@@ -1,16 +1,28 @@
-import { displayFilteredPictures } from './filters.js';
-import { loadData } from './dataApi.js';
-import { displayAlert } from './utils.js';
-import './forms.js';
+const SHOW_TIME = 5000;
+import {loadData} from './fetch.js';
+import {showAlert} from './utils.js';
+import {renderPictures} from './pictures.js';
+import './slider.js';
+import './hashtags.js';
+import {initEffects} from './actions.js';
+import './filters.js';
+import './photos.js';
+import './messages.js';
 
-// Асинхронная функция для получения изображений
-const loadPictures = async () => {
-  try {
-    const pictures = await loadData(); // Получаем данные о изображениях
-    displayFilteredPictures(pictures); // Отображаем отфильтрованные изображения
-  } catch (error) {
-    displayAlert(error); // Отображаем сообщение об ошибке
-  }
+initEffects();
+
+let photos = [];
+
+const onSuccess = (data) => {
+  photos = data.slice();
+  renderPictures(photos);
+  document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
-loadPictures();
+const onFail = () => {
+  showAlert('Ошибка загрузки', SHOW_TIME);
+};
+
+loadData(onSuccess, onFail);
+
+export {photos};
