@@ -1,59 +1,67 @@
-const ALERT_DISPLAY_DURATION = 5000; // Время отображения сообщения об ошибке
+const DELAY = 500; // Задержка для функции дебаунса в миллисекундах
 
-// Функция для отображения сообщения об ошибке
-const displayAlert = (message) => {
-  const alertBox = document.createElement('div');
-  alertBox.style.zIndex = '100';
-  alertBox.style.position = 'absolute';
-  alertBox.style.left = '0';
-  alertBox.style.top = '0';
-  alertBox.style.right = '0';
-  alertBox.style.padding = '10px 3px';
-  alertBox.style.fontSize = '30px';
-  alertBox.style.textAlign = 'center';
-  alertBox.style.backgroundColor = 'red';
-  alertBox.textContent = message;
-  document.body.append(alertBox);
-
-  setTimeout(() => {
-    alertBox.remove();
-  }, ALERT_DISPLAY_DURATION);
+// Функция для генерации случайного целого числа в заданном диапазоне
+const randomInteger = (min, max) => {
+  const lower = Math.ceil(Math.min(min, max));
+  const upper = Math.floor(Math.max(min, max));
+  const result = Math.random() * (upper - lower + 1) + lower;
+  return Math.floor(result);
 };
 
-// Функция для дебаунса
-const debounceFunction = (callback, delay = 500) => {
-  let timeoutId;
+// Функция для проверки длины строки
+const checkLenght = (inputString, maxLenght) => inputString.length <= maxLenght;
+
+// Объект для хранения значений клавиш
+const Keys = {
+  ESCAPE: 'Escape',
+  ESC: 'Esc'
+};
+
+// Функция для проверки, была ли нажата клавиша Escape
+const isEscapeKey = (evt) => evt.key === Keys.ESCAPE || evt.key === Keys.ESC;
+
+// Функция для закрытия по нажатию клавиши Escape с вызовом колбэка
+const closeOnEscKeyDown = (evt, cb) => {
+  if (isEscapeKey(evt)) {
+    cb();
+  }
+};
+
+// Функция дебаунса для ограничения частоты вызова функции
+const debounce = (cb) => {
+  let lastTimeOut = null;
 
   return (...args) => {
-    clearTimeout(timeoutId); // Очищаем предыдущий таймер
-    timeoutId = setTimeout(() => callback.apply(this, args), delay); // Устанавливаем новый таймер
+    if (lastTimeOut) {
+      window.clearTimeout(lastTimeOut);
+    }
+    lastTimeOut = window.setTimeout(() => {
+      cb(...args);
+    }, DELAY);
   };
 };
 
-// Функция для получения случайного целого числа
-const getRandomInteger = (min, max) => {
-  const lowerBound = Math.ceil(Math.min(min, max)); // Находим нижнюю границу
-  const upperBound = Math.floor(Math.max(min, max)); // Находим верхнюю границу
-  const randomValue = Math.random() * (upperBound - lowerBound + 1) + lowerBound; // Генерируем случайное число
-  return Math.floor(randomValue); // Возвращаем округленное значение
+// Функция для перемешивания массива случайным образом
+const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
+
+// Функция для отображения сообщения об ошибке или уведомления на экране
+const showAlert = (message, alertShowTime) => {
+  const alertContainer = document.createElement('div');
+  alertContainer.style.zIndex = '100';
+  alertContainer.style.position = 'absolute';
+  alertContainer.style.left = '0';
+  alertContainer.style.top = '0';
+  alertContainer.style.right = '0';
+  alertContainer.style.padding = '10px 3px';
+  alertContainer.style.fontSize = '30px';
+  alertContainer.style.textAlign = 'center';
+  alertContainer.style.backgroundColor = '#f5cc00';
+
+  alertContainer.textContent = message;
+
+  document.body.append(alertContainer);
+
+  setTimeout(() => alertContainer.remove(), alertShowTime);
 };
 
-// Функция для получения случайных элементов из массива
-const getRandomItems = (array, count) => {
-  const selectedIndices = [];
-  const limit = Math.min(count, array.length); // Ограничиваем количество выбираемых элементов
-
-  while (selectedIndices.length < limit) {
-    const index = getRandomInteger(0, array.length - 1); // Получаем случайный индекс
-    if (!selectedIndices.includes(index)) {
-      selectedIndices.push(index);
-    }
-  }
-
-  return selectedIndices.map((index) => array[index]);
-};
-
-// Функция для проверки нажатия клавиши Escape
-const isEscapeKeyPressed = (event) => event.key === 'Escape';
-
-export { getRandomInteger, getRandomItems, isEscapeKeyPressed, displayAlert, debounceFunction };
+export { randomInteger, closeOnEscKeyDown, isEscapeKey, showAlert, checkLenght, debounce, shuffleArray };

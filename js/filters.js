@@ -1,54 +1,41 @@
-import { renderPictures } from './gallery-pictures.js';
-import { debounceFunction, getRandomItems } from './utils.js';
+import { debounce, shuffleArray } from './utils.js';
+import { photos } from './main.js';
+import { renderPictures, removePictures } from './pictures.js';
 
-const MAX_RANDOM_COUNT = 10; // Максимальное количество случайных изображений
-const ACTIVE_CLASS_NAME = 'img-filters__button--active'; // Класс для активной кнопки фильтра
-const filterContainer = document.querySelector('.img-filters'); // Контейнер для фильтров
-const defaultFilterButton = document.querySelector('#filter-default'); // Кнопка "по умолчанию"
-const randomFilterButton = document.querySelector('#filter-random'); // Кнопка "случайные"
-const discussedFilterButton = document.querySelector('#filter-discussed'); // Кнопка "обсуждаемые"
+const COUNT_OF_FILTERS = 10; // Количество фотографий для фильтра "Случайные"
+const ACTIVE_CLASS = 'img-filters__button--active'; // CSS-класс для активной кнопки фильтра
+const imgFiltersForm = document.querySelector('.img-filters__form'); // Получаем элемент формы фильтров изображений из DOM
 
-// Функция для получения случайных изображений
-const getRandomPictures = (pictures, count) => getRandomItems(pictures, count);
-
-// Функция для сортировки по количеству комментариев
-const sortByCommentsCount = (a, b) => b.comments.length - a.comments.length;
-
-// Функция для получения обсуждаемых фотографий
-const getDiscussedPhotos = (pictures) => [...pictures].sort(sortByCommentsCount);
-
-// Функция для очистки изображений на странице
-const clearPictures = () => {
-  document.querySelectorAll('.picture').forEach((picture) => picture.remove());
+// Объект, содержащий функции для фильтрации фотографий
+const availableFilters = {
+  'filter-default': () => photos.slice(), // Возвращает копию массива фотографий без изменений
+  'filter-random': () => shuffleArray(photos.slice()).slice(0, COUNT_OF_FILTERS), // Возвращает 10 случайных фотографий
+  'filter-discussed': () => photos.slice().sort((firstElement, secondElement) => secondElement.comments.length - firstElement.comments.length), // Возвращает фотографии, отсортированные по убыванию количества комментариев
 };
 
-// Функция для применения выбранного фильтра
-const applyFilter = (pictures, activeButton) => {
-  clearPictures(); // Очищаем текущие изображения
-  const currentActiveButton = document.querySelector(`.${ACTIVE_CLASS_NAME}`);
-  if (currentActiveButton) {
-    currentActiveButton.classList.remove(ACTIVE_CLASS_NAME); // Убираем активный класс у текущей кнопки
+// Функция для проверки, является ли кликнутый элемент кнопкой
+const isButton = (evt) => evt.target.tagName === 'BUTTON';
+
+// Функция-обработчик клика по форме фильтров изображений с дебаунсом
+const onImgFiltersFormClick = debounce((evt) => {
+  if (isButton(evt)) {
+    removePictures(); // Удаляем отрисованные ранее фотографии
+    renderPictures(availableFilters[evt.target.id]()); // Отрисовываем отфильтрованные фотографии
   }
-  renderPictures(pictures); // Отображаем отфильтрованные изображения
-  activeButton.classList.add(ACTIVE_CLASS_NAME); // Добавляем активный класс к выбранной кнопке
+});
+
+// Функция-обработчик клика по форме фильтров изображений для переключения активного класса кнопки
+const onButtonClick = (evt) => {
+  if (isButton(evt)) {
+    const selectedButton = imgFiltersForm.querySelector(`.${ACTIVE_CLASS}`);
+
+    if (selectedButton) {
+      selectedButton.classList.remove(ACTIVE_CLASS);
+    }
+    evt.target.classList.add(ACTIVE_CLASS);
+  }
 };
 
-// Функция для отображения отфильтрованных фотографий
-const displayFilteredPictures = (pictures) => {
-  renderPictures(pictures);
-  filterContainer.classList.remove('img-filters--inactive'); // Убираем класс неактивности у контейнера фильтров
+imgFiltersForm.addEventListener('click', onImgFiltersFormClick);
 
-  randomFilterButton.addEventListener('click', debounceFunction(() => {
-    applyFilter(getRandomPictures(pictures, MAX_RANDOM_COUNT), randomFilterButton); // Применяем случайный фильтр
-  }));
-
-  discussedFilterButton.addEventListener('click', debounceFunction(() => {
-    applyFilter(getDiscussedPhotos(pictures), discussedFilterButton); // Применяем фильтр обсуждаемых фотографий
-  }));
-
-  defaultFilterButton.addEventListener('click', debounceFunction(() => {
-    applyFilter(pictures, defaultFilterButton); // Применяем фильтр по умолчанию
-  }));
-};
-
-export { displayFilteredPictures };
+imgFiltersForm.addEventListener('click', onButtonClick);

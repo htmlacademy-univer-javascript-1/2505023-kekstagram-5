@@ -1,47 +1,68 @@
-import { isEscapeKeyPressed } from './utils.js';
+import { closeForm } from './form.js';
+import { isEscapeKey } from './utils.js';
+import { uploadData } from './fetch.js';
 
-const documentBody = document.body;
-const successTemplate = document.querySelector('#success').content.querySelector('.success');
-const errorTemplate = document.querySelector('#error').content.querySelector('.error');
+const errorMessage = document.querySelector('#error').content.querySelector('.error'); // Шаблон сообщения об ошибке
+const successMessage = document.querySelector('#success').content.querySelector('.success'); // Шаблон сообщения об успехе
+const formUpload = document.querySelector('.img-upload__form'); // Форма загрузки изображения
 
-// Функция для скрытия сообщения
-const hideMessage = () => {
-  const messageElement = document.querySelector('.success') || document.querySelector('.error'); // Находим текущее сообщение
-  const closeButton = document.querySelector('.success__button') || document.querySelector('.error__button'); // Находим кнопку закрытия
-
-  document.removeEventListener('keydown', handleCloseByEscape); // Убираем обработчик нажатия клавиш
-  documentBody.removeEventListener('click', handleCloseByBodyClick); // Убираем обработчик клика по телу
-  closeButton.removeEventListener('click', hideMessage); // Убираем обработчик клика по кнопке закрытия
-  messageElement.remove(); // Удаляем сообщение из DOM
+// Функция для закрытия всплывающего сообщения (ошибки или успеха)
+const closePopup = () => {
+  const popup = document.querySelector('.error') || document.querySelector('.success');
+  popup.remove();
 };
 
-// Обработчик нажатия клавиши Escape для закрытия сообщения
-function handleCloseByEscape(evt) {
-  if (isEscapeKeyPressed(evt)) {
+// Обработчик нажатия клавиши Escape для закрытия всплывающего сообщения
+const onEscKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    closePopup();
+  }
+};
+
+// Обработчик клика по всплывающему сообщению для его закрытия
+const onPopupClick = (evt) => {
+  if (!evt.target.classList.contains('succes__inner') && !evt.target.classList.contains('error__inner')) {
     evt.preventDefault(); // Предотвращаем стандартное действие
-    hideMessage(); // Скрываем сообщение
+    closePopup(); // Закрываем всплывающее сообщение
+    document.removeEventListener('keydown', onEscKeydown); // Убираем обработчик нажатия клавиш
   }
-}
+};
 
-// Обработчик клика по телу документа для закрытия сообщения
-function handleCloseByBodyClick(evt) {
-  if (!(evt.target.closest('.success__inner') || evt.target.closest('.error__inner'))) {
-    hideMessage(); // Скрываем сообщение, если кликнули вне его области
-  }
-}
+// Функция для отображения сообщения (ошибки или успеха)
+const showMessage = (message) => {
+  message.addEventListener('click', onPopupClick); // Добавляем обработчик клика по сообщению
+  document.body.appendChild(message); // Добавляем сообщение в тело документа
+  document.addEventListener('keydown', onEscKeydown, { once: true }); // Добавляем обработчик нажатия клавиш, который сработает один раз
+};
 
-// Функция для отображения сообщения
-const displayMessage = (messageElement, closeButtonSelector) => {
-  documentBody.append(messageElement);
-  document.addEventListener('keydown', handleCloseByEscape);
-  documentBody.addEventListener('click', handleCloseByBodyClick);
-  documentBody.querySelector(closeButtonSelector).addEventListener('click', hideMessage);
+// Функция для отображения сообщения об ошибке
+const showErrorMessage = () => {
+  const messageFragment = errorMessage.cloneNode(true);
+  showMessage(messageFragment);
 };
 
 // Функция для отображения сообщения об успехе
-const showSuccessNotification = () => displayMessage(successTemplate.cloneNode(true), '.success__button');
+const showSuccesMessage = () => {
+  const messageFragment = successMessage.cloneNode(true);
+  showMessage(messageFragment);
+};
 
-// Функция для отображения сообщения об ошибке
-const showErrorNotification = () => displayMessage(errorTemplate.cloneNode(true), '.error__button');
+// Функция обработки успешной загрузки данных
+const onSuccess = () => {
+  closeForm();
+  showSuccesMessage();
+};
 
-export { showSuccessNotification, showErrorNotification };
+// Функция обработки ошибки загрузки данных
+const onFail = () => {
+  showErrorMessage();
+};
+
+// Обработчик события отправки формы загрузки изображения
+const onFormUploadSubmit = (evt) => {
+  evt.preventDefault(); // Предотвращаем стандартное поведение формы (перезагрузку страницы)
+  uploadData(onSuccess, onFail, 'POST', new FormData(evt.target)); // Отправляем данные формы на сервер с помощью функции uploadData
+};
+
+// Добавляем обработчик события отправки формы
+formUpload.addEventListener('submit', onFormUploadSubmit);
