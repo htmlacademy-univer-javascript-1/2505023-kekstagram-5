@@ -1,26 +1,27 @@
-import { imagePreview } from './slider.js';
+import { imagePreview } from './form.js';
 
-const MAX_BLUR_VALUE = 3;
-const MAX_BRIGHTNESS_VALUE = 3;
-const MIN_BRIGHTNESS_VALUE = 1;
-const MAX_VALUE_EFFECT = 100;
-const MIN_VALUE_EFFECT = 0;
-const MAX_GRAYSCALE_EFFECT = 1;
-const MAX_SEPIA_EFFECT = 1;
-const EFFECTS_STEP = 0.1;
-const STEP_FOR_NONE = 1;
+const MAX_BLUR_VALUE = 3; // Максимальное значение размытия
+const MAX_BRIGHTNESS_VALUE = 3; // Максимальное значение яркости
+const MIN_BRIGHTNESS_VALUE = 1; // Минимальное значение яркости
+const MAX_VALUE_EFFECT = 100; // Максимальное значение эффекта (для инвертирования)
+const MIN_VALUE_EFFECT = 0; // Минимальное значение эффекта
+const MAX_GRAYSCALE_EFFECT = 1; // Максимальное значение серого эффекта
+const MAX_SEPIA_EFFECT = 1; // Максимальное значение сепии
+const EFFECTS_STEP = 0.1; // Шаг изменения эффекта
+const STEP_FOR_NONE = 1; // Шаг для отсутствия эффекта
 
 const Slider = {
-  MIN: 0,
-  MAX: 100,
-  STEP: 0.1,
+  MIN: 0, // Минимальное значение слайдера
+  MAX: 100, // Максимальное значение слайдера
+  STEP: 0.1, // Шаг слайдера
 };
 
-const slider = document.querySelector('.effect-level__slider');
-const sliderWrapper = document.querySelector('.effect-level');
-const effectValue = document.querySelector('.effect-level__value');
-const effectList = document.querySelector('.effects__list');
+const slider = document.querySelector('.effect-level__slider'); // Слайдер для регулировки эффекта
+const sliderWrapper = document.querySelector('.effect-level'); // Обертка для слайдера
+const effectValue = document.querySelector('.effect-level__value'); // Поле для отображения значения эффекта
+const effectList = document.querySelector('.effects__list'); // Список доступных эффектов
 
+// Определяем эффекты и их параметры
 const Effects = {
   none: {
     filter: 'none',
@@ -47,6 +48,7 @@ const Effects = {
       step: EFFECTS_STEP,
     },
   },
+
   sepia: {
     filter: 'sepia',
     units: '',
@@ -59,6 +61,7 @@ const Effects = {
       step: EFFECTS_STEP,
     },
   },
+
   marvin: {
     filter: 'invert',
     units: '%',
@@ -71,6 +74,7 @@ const Effects = {
       step: EFFECTS_STEP,
     },
   },
+
   phobos: {
     filter: 'blur',
     units: 'px',
@@ -83,6 +87,7 @@ const Effects = {
       step: EFFECTS_STEP,
     },
   },
+
   heat: {
     filter: 'brightness',
     units: '',
@@ -97,6 +102,7 @@ const Effects = {
   },
 };
 
+// Инициализация слайдера эффектов
 const initEffects = () => {
   const sliderConfig = {
     start: Slider.MAX,
@@ -115,24 +121,26 @@ const initEffects = () => {
     },
   };
 
-  noUiSlider.create(slider, sliderConfig);
+  noUiSlider.create(slider, sliderConfig); // Создаем слайдер с заданными параметрами
 };
 
+// Обработчик изменения выбранного фильтра
 const onFilterButtonChange = (evt) => {
-  const evtHandler = evt.target.value;
+  const selectedEffect = evt.target.value;
 
-  if (evtHandler === 'none') {
-    sliderWrapper.classList.add('hidden');
+  if (selectedEffect === 'none') {
+    sliderWrapper.classList.add('hidden'); // Скрываем слайдер, если эффект отсутствует
     imagePreview.style.filter = 'none';
     imagePreview.removeAttribute('class');
   } else {
     sliderWrapper.classList.remove('hidden');
 
-    imagePreview.setAttribute('class', `effects__preview--${evtHandler}`);
-    slider.noUiSlider.updateOptions(Effects[evtHandler].options);
+    imagePreview.setAttribute('class', `effects__preview--${selectedEffect}`);
+    slider.noUiSlider.updateOptions(Effects[selectedEffect].options);
+
     slider.noUiSlider.on('update', (values, handle) => {
       effectValue.value = values[handle];
-      imagePreview.style.filter = `${Effects[evtHandler].filter}(${effectValue.value}${Effects[evtHandler].units})`;
+      imagePreview.style.filter = `${Effects[selectedEffect].filter}(${effectValue.value}${Effects[selectedEffect].units})`;
     });
   }
 };
